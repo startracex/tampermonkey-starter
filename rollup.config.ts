@@ -1,0 +1,79 @@
+import { createRequire } from "node:module";
+import { basename, extname, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+import type { Plugin, RollupOptions } from "rollup";
+import oxc from "rollup-plugin-oxc";
+
+const require = createRequire(import.meta.url);
+
+const pkgJson = require("./package.json");
+
+const meta = {
+  name: pkgJson.name,
+  description: pkgJson.description,
+  version: pkgJson.version,
+  author: pkgJson.author,
+  ...pkgJson.tampermonkey,
+};
+
+export default {
+  input: "src/index.ts",
+  output: {
+    banner: buildHeader(meta),
+    file: "dist/output.js",
+    format: "iife",
+    sourcemap: true,
+  },
+  plugins: [
+    oxc({
+      minify: true,
+    }),
+    updateMeta({
+      meta,
+    }),
+  ],
+} satisfies RollupOptions;
+
+function buildHeader(options) {
+  return `// ==UserScript==\n${Object.entries(options)
+    .map(([key, value]) =>
+      (Array.isArray(value) ? value : [value]).map(
+        //
+        (v) => `// @${key.padEnd(13)}${v}\n`
+      )
+    )
+    .join("")}// ==/UserScript==\n`;
+}
+
+function updateMeta({
+  getName = (chunkBase: string) => `${chunkBase}.meta.js`,
+  meta,
+}: {
+  getName?: (chunkBase: string) => string;
+  getMeta?: (chunkBase: string) => string;
+  meta?: Record<string, any>;
+} = {}): Plugin {
+  const cache = new Set<string>();
+  return {
+    name: "update-meta",
+
+    async generateBundle({ file }) {
+      if (!file || cache.has(file)) {
+        return;
+      }
+      cache.add(file);
+      const ext = extname(file);
+      const chunkBase = basename(file.slice(0, -ext.length));
+      const metaRequires = new Set(meta?.require);
+      metaRequires.add(pathToFileURL(resolve(file)));
+      this.emitFile({
+        type: "asset",
+        fileName: getName(chunkBase),
+        source: buildHeader({
+          ...meta,
+          require: [...metaRequires],
+        }),
+      });
+    },
+  };
+}

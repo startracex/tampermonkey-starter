@@ -1,5 +1,13 @@
-Create a tampermonkey script.
+A tampermonkey starter
 
-Dist file at dist/output.js.
+## Install dependencies.
 
-In development mode, copy dist/header.js to new script to require local dist file.
+```sh
+pnpm i
+```
+
+## Build and generate metadata
+
+```sh
+pnpm build
+```
