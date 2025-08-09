@@ -1,5 +1,5 @@
 {
-  "name": "tampermonkey-script",
+  "name": "tampermonkey-starter",
   "description": "tampermonkey starter",
   "private": true,
   "version": "0.0.0",
@@ -23,6 +23,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/startracex/tampermonkey-script"
+    "url": "git+https://github.com/startracex/tampermonkey-starter"
   }
 }
