@@ -14,7 +14,7 @@
   },
   "tampermonkey": {
     "namespace": "http://tampermonkey.net/",
-    "match": "https://*.*",
+    "match": "*://*/*",
     "icon": "",
     "grant": "none",
     "require": []
