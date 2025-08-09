@@ -4,9 +4,19 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.ts"
   },
   "devDependencies": {
-    "esbuild": "^0.23.0"
+    "@startracex/dev-config": "^0.5.0",
+    "@types/node": "^24.2.1",
+    "rolldown": "1.0.0-beta.31",
+    "typescript": "^5.9.2"
+  },
+  "tampermonkey": {
+    "namespace": "http://tampermonkey.net/",
+    "match": "https://*.*",
+    "icon": "",
+    "grant": "none",
+    "require": []
   }
 }
