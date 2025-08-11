@@ -21,7 +21,7 @@ const meta = {
 export default {
   input: "src/index.ts",
   output: {
-    banner: buildHeader(meta),
+    banner: buildMeta(meta),
     file: "dist/output.js",
     format: "iife",
     sourcemap: true,
@@ -30,11 +30,11 @@ export default {
     oxc({
       minify: !DEV_MODE,
     }),
-    DEV_MODE && updateMeta({ meta }),
+    DEV_MODE && buildMetaPlugin({ meta }),
   ],
 } satisfies RollupOptions;
 
-function buildHeader(options) {
+function buildMeta(options: Record<string, any>): string {
   return `// ==UserScript==\n${Object.entries(options)
     .map(([key, value]) =>
       (Array.isArray(value) ? value : [value]).map(
@@ -45,19 +45,18 @@ function buildHeader(options) {
     .join("")}// ==/UserScript==\n`;
 }
 
-function updateMeta({
+function buildMetaPlugin({
   getName = (chunkBase: string) => `${chunkBase}.meta.js`,
   meta,
 }: {
   getName?: (chunkBase: string) => string;
-  getMeta?: (chunkBase: string) => string;
   meta?: Record<string, any>;
 } = {}): Plugin {
   const cache = new Set<string>();
   return {
     name: "update-meta",
 
-    async generateBundle({ file }) {
+    generateBundle({ file }) {
       if (!file || cache.has(file)) {
         return;
       }
@@ -69,7 +68,7 @@ function updateMeta({
       this.emitFile({
         type: "asset",
         fileName: getName(chunkBase),
-        source: buildHeader({
+        source: buildMeta({
           ...meta,
           require: [...metaRequires],
         }),
