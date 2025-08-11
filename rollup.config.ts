@@ -24,7 +24,6 @@ export default {
     banner: buildMeta(meta),
     file: "dist/output.js",
     format: "iife",
-    sourcemap: true,
   },
   plugins: [
     oxc({
