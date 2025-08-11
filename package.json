@@ -5,6 +5,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "dev": "rollup -c rollup.config.ts --watch --environment NODE_ENV:development",
     "build": "rollup -c rollup.config.ts"
   },
   "devDependencies": {

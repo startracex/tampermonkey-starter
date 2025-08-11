@@ -4,6 +4,8 @@ import { pathToFileURL } from "node:url";
 import type { Plugin, RollupOptions } from "rollup";
 import oxc from "rollup-plugin-oxc";
 
+const DEV_MODE = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
+
 const require = createRequire(import.meta.url);
 
 const pkgJson = require("./package.json");
@@ -26,11 +28,9 @@ export default {
   },
   plugins: [
     oxc({
-      minify: true,
+      minify: !DEV_MODE,
     }),
-    updateMeta({
-      meta,
-    }),
+    DEV_MODE && updateMeta({ meta }),
   ],
 } satisfies RollupOptions;
 
