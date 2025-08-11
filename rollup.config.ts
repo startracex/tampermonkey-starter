@@ -46,10 +46,10 @@ function buildMeta(options: Record<string, any>): string {
 }
 
 export function buildMetaPlugin({
-  getName = (chunkBase: string) => `${chunkBase}.meta.js`,
+  name,
   meta,
 }: {
-  getName?: (chunkBase: string) => string;
+  name?: string;
   meta?: Record<string, any>;
 } = {}): Plugin {
   const cache = new Set<string>();
@@ -62,18 +62,19 @@ export function buildMetaPlugin({
       }
       cache.add(file);
 
-      const ext = extname(file);
       const base = basename(file);
       const chunk = bundle[base];
       if (chunk?.type === "chunk" && !userScriptRegExp.test(chunk.code)) {
         chunk.code = buildMeta(meta) + chunk.code;
       }
-
+      if (!name) {
+        return;
+      }
       const metaRequires = new Set(meta?.require);
       metaRequires.add(pathToFileURL(resolve(file)));
       this.emitFile({
         type: "asset",
-        fileName: getName(base.slice(0, -ext.length)),
+        fileName: name,
         source: buildMeta({
           ...meta,
           require: [...metaRequires],
