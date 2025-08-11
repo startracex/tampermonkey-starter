@@ -1,12 +1,18 @@
 A tampermonkey starter
 
-## Install dependencies.
+Install dependencies.
 
 ```sh
 pnpm i
 ```
 
-## Build and generate metadata
+Build in watch mode and generate metadata.
+
+```sh
+pnpm dev
+```
+
+Build for production.
 
 ```sh
 pnpm build
