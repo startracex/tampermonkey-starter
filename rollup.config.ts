@@ -21,7 +21,6 @@ const meta = {
 export default {
   input: "src/index.ts",
   output: {
-    banner: buildMeta(meta),
     file: "dist/output.js",
     format: "iife",
   },
@@ -29,9 +28,11 @@ export default {
     oxc({
       minify: !DEV_MODE,
     }),
-    DEV_MODE && buildMetaPlugin({ meta }),
+    buildMetaPlugin({ meta }),
   ],
 } satisfies RollupOptions;
+
+const userScriptRegExp = /^\/\/\s*==UserScript==/;
 
 function buildMeta(options: Record<string, any>): string {
   return `// ==UserScript==\n${Object.entries(options)
@@ -44,7 +45,7 @@ function buildMeta(options: Record<string, any>): string {
     .join("")}// ==/UserScript==\n`;
 }
 
-function buildMetaPlugin({
+export function buildMetaPlugin({
   getName = (chunkBase: string) => `${chunkBase}.meta.js`,
   meta,
 }: {
@@ -55,18 +56,24 @@ function buildMetaPlugin({
   return {
     name: "update-meta",
 
-    generateBundle({ file }) {
+    generateBundle({ file }, bundle) {
       if (!file || cache.has(file)) {
         return;
       }
       cache.add(file);
+
       const ext = extname(file);
-      const chunkBase = basename(file.slice(0, -ext.length));
+      const base = basename(file);
+      const chunk = bundle[base];
+      if (chunk?.type === "chunk" && !userScriptRegExp.test(chunk.code)) {
+        chunk.code = buildMeta(meta) + chunk.code;
+      }
+
       const metaRequires = new Set(meta?.require);
       metaRequires.add(pathToFileURL(resolve(file)));
       this.emitFile({
         type: "asset",
-        fileName: getName(chunkBase),
+        fileName: getName(base.slice(0, -ext.length)),
         source: buildMeta({
           ...meta,
           require: [...metaRequires],
