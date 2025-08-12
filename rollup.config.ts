@@ -42,10 +42,12 @@ const userScriptRegExp = /^\/\/\s*==UserScript==/;
 function buildMeta(options: Record<string, any>): string {
   return `// ==UserScript==\n${Object.entries(options)
     .map(([key, value]) =>
-      (Array.isArray(value) ? value : [value]).map(
-        //
-        (v) => `// @${key.padEnd(13)}${v}\n`
-      )
+      (Array.isArray(value) ? value : [value])
+        .map(
+          //
+          (v) => `// @${key.padEnd(13)}${v}\n`
+        )
+        .join("")
     )
     .join("")}// ==/UserScript==\n`;
 }
