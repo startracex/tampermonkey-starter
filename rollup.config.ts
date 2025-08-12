@@ -28,7 +28,12 @@ export default {
     oxc({
       minify: !DEV_MODE,
     }),
-    buildMetaPlugin({ meta }),
+    buildMetaPlugin({
+      meta,
+      name: "output.meta.js",
+      banner: DEV_MODE,
+      requireLocal: DEV_MODE,
+    }),
   ],
 } satisfies RollupOptions;
 
@@ -48,10 +53,12 @@ function buildMeta(options: Record<string, any>): string {
 export function buildMetaPlugin({
   name,
   meta,
+  banner: emitBanner,
   requireLocal,
 }: {
   name?: string;
   meta?: Record<string, any>;
+  banner?: boolean;
   requireLocal?: boolean;
 } = {}): Plugin {
   const cache = new Set<string>();
@@ -65,9 +72,12 @@ export function buildMetaPlugin({
       cache.add(file);
 
       const base = basename(file);
-      const chunk = bundle[base];
-      if (chunk?.type === "chunk" && !userScriptRegExp.test(chunk.code)) {
-        chunk.code = buildMeta(meta) + chunk.code;
+      emitBanner ??= !name;
+      if (emitBanner) {
+        const chunk = bundle[base];
+        if (chunk?.type === "chunk" && !userScriptRegExp.test(chunk.code)) {
+          chunk.code = buildMeta(meta) + chunk.code;
+        }
       }
       if (!name) {
         return;
