@@ -1,5 +1,5 @@
 import { createRequire } from "node:module";
-import { basename, extname, resolve } from "node:path";
+import { basename, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import type { Plugin, RollupOptions } from "rollup";
 import oxc from "rollup-plugin-oxc";
@@ -48,13 +48,15 @@ function buildMeta(options: Record<string, any>): string {
 export function buildMetaPlugin({
   name,
   meta,
+  requireLocal,
 }: {
   name?: string;
   meta?: Record<string, any>;
+  requireLocal?: boolean;
 } = {}): Plugin {
   const cache = new Set<string>();
   return {
-    name: "update-meta",
+    name: "build-meta",
 
     generateBundle({ file }, bundle) {
       if (!file || cache.has(file)) {
@@ -71,7 +73,9 @@ export function buildMetaPlugin({
         return;
       }
       const metaRequires = new Set(meta?.require);
-      metaRequires.add(pathToFileURL(resolve(file)));
+      if (requireLocal) {
+        metaRequires.add(pathToFileURL(resolve(file)));
+      }
       this.emitFile({
         type: "asset",
         fileName: name,
