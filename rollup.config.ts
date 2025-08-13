@@ -55,7 +55,7 @@ function buildMeta(options: Record<string, any>): string {
 export function buildMetaPlugin({
   name,
   meta,
-  banner: emitBanner,
+  banner = true,
   requireLocal,
 }: {
   name?: string;
@@ -74,8 +74,7 @@ export function buildMetaPlugin({
       cache.add(file);
 
       const base = basename(file);
-      emitBanner ??= !name;
-      if (emitBanner) {
+      if (banner) {
         const chunk = bundle[base];
         if (chunk?.type === "chunk" && !userScriptRegExp.test(chunk.code)) {
           chunk.code = buildMeta(meta) + chunk.code;
